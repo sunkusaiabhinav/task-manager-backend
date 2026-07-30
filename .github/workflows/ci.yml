@@ -37,14 +37,15 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: ${{ runner.os }}-pip-
 
-      - name: Install ruff
+      - name: Install Ruff
         run: pip install ruff==0.8.4
 
-      - name: Run ruff linter
+      - name: Run Ruff linter
         run: ruff check .
 
-      - name: Run ruff formatter check
+      - name: Run Ruff formatter check
         run: ruff format --check .
+
 
   # ── Job 2: Tests + Coverage ─────────────────────────────────────────────
   test:
@@ -73,17 +74,61 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests with coverage
-        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=70 -v
+        run: >
+          pytest
+          --cov=app
+          --cov-report=term-missing
+          --cov-report=xml
+          --cov-fail-under=70
+          -v
         env:
-          APP_ENV: "testing"
-          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+          APP_ENV: ${{ vars.APP_ENV }}
+          DATABASE_URL: ${{ vars.DATABASE_URL }}
 
-  # ── Job 3: Security Scanning ─────────────────────────────────────────────
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 1
+
+
+  # ── Job 3: SonarQube Cloud ──────────────────────────────────────────────
+  sonar:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: .
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+
+
+  # ── Job 4: Security Scanning ────────────────────────────────────────────
   security:
     name: Security Scans
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: test
+    needs: sonar
 
     steps:
       - name: Checkout code
@@ -107,7 +152,8 @@ jobs:
       - name: Dependency vulnerability scan
         run: pip-audit --requirement requirements.txt
 
-  # ── Job 4: Docker Build ───────────────────────────────────────────────────
+
+  # ── Job 5: Docker Build ─────────────────────────────────────────────────
   docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
@@ -141,7 +187,8 @@ jobs:
           path: image.tar
           retention-days: 1
 
-  # ── Job 5: Trivy Image Scan ───────────────────────────────────────────────
+
+  # ── Job 6: Trivy Image Scan ─────────────────────────────────────────────
   image-scan:
     name: Trivy Image Scan
     runs-on: ubuntu-latest
