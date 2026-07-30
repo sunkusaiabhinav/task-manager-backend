@@ -149,7 +149,7 @@ jobs:
     needs: docker-build
 
     steps:
-      - name: Download image artifact
+      - name: Download Docker image
         uses: actions/download-artifact@v4
         with:
           name: docker-image
@@ -157,11 +157,15 @@ jobs:
       - name: Load Docker image
         run: docker load -i image.tar
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.28.0
+      - name: Set up Trivy
+        uses: aquasecurity/setup-trivy@v0.2.6
         with:
-          image-ref: task-manager-api:${{ github.sha }}
-          format: table
-          severity: HIGH,CRITICAL
-          exit-code: "1"
-          ignore-unfixed: true
+          version: v0.70.0
+
+      - name: Scan Docker image
+        run: |
+          trivy image \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            task-manager-api:${{ github.sha }}
