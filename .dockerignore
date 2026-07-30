@@ -1,0 +1,45 @@
+# Files/directories to EXCLUDE from the Docker build context.
+# Smaller build context = faster builds and smaller images.
+
+# Version control (never needed inside an image)
+.git/
+.gitignore
+
+# Environment / secrets (CRITICAL — never bake these into an image)
+.env
+.env.*
+*.env
+
+# Tests (not needed at runtime)
+tests/
+pytest.ini
+pyproject.toml
+.coverage
+.pytest_cache/
+htmlcov/
+coverage.xml
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ruff_cache/
+.mypy_cache/
+
+# Development artifacts
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+
+# Docs (optional — remove if you want them available inside the container)
+README.md
+*.md
+
+# OS
+.DS_Store
+Thumbs.db

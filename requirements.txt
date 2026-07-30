@@ -1,0 +1,26 @@
+# Web framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+
+# Required by SQLAlchemy async on Python 3.13
+greenlet==3.1.1
+
+# Database
+sqlalchemy==2.0.36
+aiosqlite==0.20.0
+
+# Validation & settings
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+httpx==0.28.1
+
+# Code quality
+ruff==0.8.4
+
+# Security scanning (dev)
+pip-audit==2.7.3
