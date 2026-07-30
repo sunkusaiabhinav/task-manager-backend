@@ -7,7 +7,7 @@ This is what SQLAlchemy uses to:
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, Enum, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -17,7 +17,7 @@ from app.db.session import Base
 
 def _utcnow() -> datetime:
     """Return current UTC time (timezone-aware)."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Task(Base):

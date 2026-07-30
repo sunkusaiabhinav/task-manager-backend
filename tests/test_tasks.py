@@ -91,18 +91,14 @@ async def test_create_task_missing_title_returns_422(client):
 @pytest.mark.asyncio
 async def test_create_task_invalid_status_returns_422(client):
     """Invalid enum value for status must return 422."""
-    response = await client.post(
-        BASE, json={"title": "Bad status", "status": "invalid_value"}
-    )
+    response = await client.post(BASE, json={"title": "Bad status", "status": "invalid_value"})
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
 async def test_create_task_invalid_priority_returns_422(client):
     """Invalid enum value for priority must return 422."""
-    response = await client.post(
-        BASE, json={"title": "Bad priority", "priority": "urgent"}
-    )
+    response = await client.post(BASE, json={"title": "Bad priority", "priority": "urgent"})
     assert response.status_code == 422
 
 
@@ -227,6 +223,7 @@ async def test_update_task_updates_timestamp(client):
 
     # Small delay to ensure a different timestamp
     import asyncio
+
     await asyncio.sleep(0.01)
 
     response = await client.patch(f"{BASE}/{task_id}", json={"status": "in_progress"})
@@ -247,9 +244,7 @@ async def test_update_task_empty_body_returns_400(client):
 @pytest.mark.asyncio
 async def test_update_task_not_found_returns_404(client):
     """PATCHing a non-existent task must return 404."""
-    response = await client.patch(
-        f"{BASE}/nonexistent-id", json={"status": "done"}
-    )
+    response = await client.patch(f"{BASE}/nonexistent-id", json={"status": "done"})
     assert response.status_code == 404
 
 

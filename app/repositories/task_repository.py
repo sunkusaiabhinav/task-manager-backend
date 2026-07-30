@@ -10,7 +10,7 @@ Why separate from the service layer?
   - Easy to mock in tests (replace repository, not the database)
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,15 +34,13 @@ class TaskRepository:
             priority=payload.priority.value,
         )
         self.db.add(task)
-        await self.db.flush()   # get the generated id without committing
+        await self.db.flush()  # get the generated id without committing
         await self.db.refresh(task)
         return task
 
     async def get_by_id(self, task_id: str) -> Task | None:
         """Fetch a single task by its UUID. Returns None if not found."""
-        result = await self.db.execute(
-            select(Task).where(Task.id == task_id)
-        )
+        result = await self.db.execute(select(Task).where(Task.id == task_id))
         return result.scalar_one_or_none()
 
     async def list_all(
@@ -93,7 +91,7 @@ class TaskRepository:
 
         # Manually set updated_at since SQLAlchemy onupdate doesn't
         # trigger on attribute assignment alone with async sessions
-        task.updated_at = datetime.now(timezone.utc)
+        task.updated_at = datetime.now(UTC)
 
         await self.db.flush()
         await self.db.refresh(task)
