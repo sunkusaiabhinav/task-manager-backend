@@ -15,9 +15,9 @@ from app.api.deps import DbSession
 from app.schemas.task import (
     TaskCreate,
     TaskListResponse,
+    TaskPriority,
     TaskResponse,
     TaskStatus,
-    TaskPriority,
     TaskUpdate,
 )
 from app.services.task_service import TaskService
@@ -100,9 +100,7 @@ async def get_task(task_id: str, db: DbSession) -> TaskResponse:
         400: {"description": "No fields provided"},
     },
 )
-async def update_task(
-    task_id: str, payload: TaskUpdate, db: DbSession
-) -> TaskResponse:
+async def update_task(task_id: str, payload: TaskUpdate, db: DbSession) -> TaskResponse:
     """
     Update one or more fields of an existing task.
 

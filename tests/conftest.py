@@ -7,7 +7,6 @@ Key fixture: `client`
   - Returns an AsyncClient that can make real HTTP requests to the FastAPI app
 """
 
-import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -44,13 +43,13 @@ async def db_session(db_engine):
     Provide a database session backed by the in-memory engine.
     Each test gets its own isolated session and schema.
     """
-    TestSessionLocal = async_sessionmaker(
+    session_factory = async_sessionmaker(
         bind=db_engine,
         expire_on_commit=False,
         autoflush=False,
         autocommit=False,
     )
-    async with TestSessionLocal() as session:
+    async with session_factory() as session:
         yield session
 
 
