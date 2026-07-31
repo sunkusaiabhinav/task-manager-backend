@@ -20,7 +20,6 @@ from app.core.config import settings
 from app.db.session import create_tables
 from app.schemas.task import HealthResponse
 
-
 # ── Logging setup ─────────────────────────────────────────────────────────
 logging.basicConfig(
     level=getattr(logging, settings.log_level.upper(), logging.INFO),
