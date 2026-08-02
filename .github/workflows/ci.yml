@@ -17,11 +17,11 @@ jobs:
 
   # ── Job 1: Lint & Format ────────────────────────────────────────────────
   lint:
-  name: Lint, Formatting & Static Analysis
-  runs-on: ubuntu-latest
-  timeout-minutes: 15
+    name: Lint, Formatting & Static Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
-  steps:
+    steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -41,7 +41,7 @@ jobs:
     - name: Install project dependencies
       run: pip install -r requirements.txt
 
-    - name: Install Quality & Security Tools
+    - name: Install Quality Tools
       run: |
         pip install \
           ruff==0.8.4 \
@@ -49,53 +49,29 @@ jobs:
           isort==6.0.1 \
           flake8==7.1.1 \
           mypy==1.15.0 \
-          bandit==1.8.3 \
-          pip-audit==2.9.0
+          bandit==1.8.3
 
-    # -----------------------------
-    # Ruff
-    # -----------------------------
     - name: Ruff Lint
       run: ruff check .
 
     - name: Ruff Format Check
       run: ruff format --check .
 
-    # -----------------------------
-    # Black
-    # -----------------------------
     - name: Black Format Check
       run: black --check .
 
-    # -----------------------------
-    # isort
-    # -----------------------------
     - name: Import Sorting Check
       run: isort --check-only .
 
-    # -----------------------------
-    # Flake8
-    # -----------------------------
     - name: Flake8 Lint
       run: flake8 .
 
-    # -----------------------------
-    # MyPy
-    # -----------------------------
     - name: MyPy Type Check
       run: mypy app
 
-    # -----------------------------
-    # Bandit
-    # -----------------------------
     - name: Bandit Security Scan
       run: bandit -r app
-
-    # -----------------------------
-    # Dependency Vulnerability Scan
-    # -----------------------------
-    - name: pip-audit
-      run: pip-audit -r requirements.txt
+  
 
       
 
@@ -133,32 +109,32 @@ jobs:
 
   # ── Job 3: Security Scanning ─────────────────────────────────────────────
   security:
-    name: Security Scans
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: test
+  name: Security Scans
+  runs-on: ubuntu-latest
+  timeout-minutes: 15
+  needs: test
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      - name: Secret scanning with Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Secret scanning with Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
 
-      - name: Install dependencies + pip-audit
-        run: pip install -r requirements.txt pip-audit==2.7.3
+    - name: Install dependencies + pip-audit
+      run: pip install -r requirements.txt pip-audit==2.9.0
 
-      - name: Dependency vulnerability scan
-        run: pip-audit --requirement requirements.txt
+    - name: Dependency vulnerability scan
+      run: pip-audit -r requirements.txt
 
   # ── Job 4: Docker Build ───────────────────────────────────────────────────
   docker-build:
