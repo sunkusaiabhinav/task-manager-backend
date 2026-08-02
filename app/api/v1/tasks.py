@@ -12,14 +12,8 @@ No business logic here. No direct DB access here.
 from fastapi import APIRouter, Query, status
 
 from app.api.deps import DbSession
-from app.schemas.task import (
-    TaskCreate,
-    TaskListResponse,
-    TaskPriority,
-    TaskResponse,
-    TaskStatus,
-    TaskUpdate,
-)
+from app.schemas.task import (TaskCreate, TaskListResponse, TaskPriority,
+                              TaskResponse, TaskStatus, TaskUpdate)
 from app.services.task_service import TaskService
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
