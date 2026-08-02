@@ -71,9 +71,6 @@ jobs:
 
     - name: Bandit Security Scan
       run: bandit -r app
-  
-
-      
 
   # ── Job 2: Tests + Coverage ─────────────────────────────────────────────
   test:
@@ -96,7 +93,8 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -114,30 +112,29 @@ jobs:
     timeout-minutes: 15
     needs: test
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Secret scanning with Gitleaks
-      uses: gitleaks/gitleaks-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Secret scanning with Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.12"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-    - name: Install dependencies + pip-audit
-      run: |
-        pip install -r requirements.txt
-        pip install pip-audit==2.9.0
+      - name: Install dependencies + pip-audit
+        run: |
+          pip install -r requirements.txt
+          pip install pip-audit==2.9.0
 
-    - name: Dependency vulnerability scan
-      run: pip-audit -r requirements.txt
-  
+      - name: Dependency vulnerability scan
+        run: pip-audit -r requirements.txt
 
   # ── Job 4: Docker Build ───────────────────────────────────────────────────
   docker-build:
