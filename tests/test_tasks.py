@@ -91,14 +91,18 @@ async def test_create_task_missing_title_returns_422(client):
 @pytest.mark.asyncio
 async def test_create_task_invalid_status_returns_422(client):
     """Invalid enum value for status must return 422."""
-    response = await client.post(BASE, json={"title": "Bad status", "status": "invalid_value"})
+    response = await client.post(
+        BASE, json={"title": "Bad status", "status": "invalid_value"}
+    )
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
 async def test_create_task_invalid_priority_returns_422(client):
     """Invalid enum value for priority must return 422."""
-    response = await client.post(BASE, json={"title": "Bad priority", "priority": "urgent"})
+    response = await client.post(
+        BASE, json={"title": "Bad priority", "priority": "urgent"}
+    )
     assert response.status_code == 422
 
 
