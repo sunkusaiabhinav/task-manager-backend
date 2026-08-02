@@ -17,34 +17,57 @@ jobs:
 
   # ── Job 1: Lint & Format ────────────────────────────────────────────────
   lint:
-    name: Lint & Format Check
+    name: Lint, Formatting & Static Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
-      - name: Install ruff
-        run: pip install ruff==0.8.4
+    - name: Install project dependencies
+      run: pip install -r requirements.txt
 
-      - name: Run ruff linter
-        run: ruff check .
+    - name: Install Quality Tools
+      run: |
+        pip install \
+          ruff==0.8.4 \
+          black==25.1.0 \
+          isort==6.0.1 \
+          flake8==7.1.1 \
+          mypy==1.15.0 \
+          bandit==1.8.3
 
-      - name: Run ruff formatter check
-        run: ruff format --check .
+    - name: Ruff Lint
+      run: ruff check .
+
+    - name: Black Format Check
+      run: black --check .
+
+    - name: Import Sorting Check
+      run: isort --check-only .
+
+    - name: Flake8 Lint
+      run: flake8 .
+
+    - name: MyPy Type Check
+      run: mypy app
+
+    - name: Bandit Security Scan
+      run: bandit -r app
 
   # ── Job 2: Tests + Coverage ─────────────────────────────────────────────
   test:
@@ -67,7 +90,8 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -102,10 +126,12 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies + pip-audit
-        run: pip install -r requirements.txt pip-audit==2.7.3
+        run: |
+          pip install -r requirements.txt
+          pip install pip-audit==2.9.0
 
       - name: Dependency vulnerability scan
-        run: pip-audit --requirement requirements.txt
+        run: pip-audit -r requirements.txt
 
   # ── Job 4: Docker Build ───────────────────────────────────────────────────
   docker-build:

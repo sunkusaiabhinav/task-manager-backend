@@ -25,6 +25,7 @@ logging.basicConfig(
     level=getattr(logging, settings.log_level.upper(), logging.INFO),
     format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
 )
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,9 +33,11 @@ logger = logging.getLogger(__name__)
 def create_app() -> FastAPI:
     """
     Build and configure the FastAPI application.
+
     Using a factory function makes it easy to create test instances
     with different configurations.
     """
+
     app = FastAPI(
         title=settings.app_name,
         description=(
@@ -49,7 +52,7 @@ def create_app() -> FastAPI:
     )
 
     # ── CORS ──────────────────────────────────────────────────────────────
-    # Allow all origins in development; lock this down in production
+    # Allow all origins in development; lock this down in production.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"] if not settings.is_production else [],
@@ -61,21 +64,40 @@ def create_app() -> FastAPI:
     # ── Lifecycle events ──────────────────────────────────────────────────
     @app.on_event("startup")
     async def on_startup() -> None:
-        logger.info("Starting up %s [env=%s]", settings.app_name, settings.app_env)
+        logger.info(
+            "Starting up %s [env=%s]",
+            settings.app_name,
+            settings.app_env,
+        )
+
         await create_tables()
+
         logger.info("Database tables verified/created.")
 
     @app.on_event("shutdown")
     async def on_shutdown() -> None:
-        logger.info("Shutting down %s", settings.app_name)
+        logger.info(
+            "Shutting down %s",
+            settings.app_name,
+        )
 
     # ── Global exception handler ──────────────────────────────────────────
     @app.exception_handler(Exception)
-    async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-        logger.exception("Unhandled exception on %s %s", request.method, request.url)
+    async def unhandled_exception_handler(
+        request: Request,
+        exc: Exception,
+    ) -> JSONResponse:
+        logger.exception(
+            "Unhandled exception on %s %s",
+            request.method,
+            request.url,
+        )
+
         return JSONResponse(
             status_code=500,
-            content={"detail": "An internal server error occurred."},
+            content={
+                "detail": "An internal server error occurred.",
+            },
         )
 
     # ── Health endpoint ───────────────────────────────────────────────────
@@ -95,6 +117,7 @@ def create_app() -> FastAPI:
           - CI/CD pipeline smoke tests
           - Load balancers
         """
+
         return HealthResponse(
             status="ok",
             app_name=settings.app_name,
@@ -102,7 +125,10 @@ def create_app() -> FastAPI:
         )
 
     # ── Routers ───────────────────────────────────────────────────────────
-    app.include_router(v1_router, prefix=settings.api_v1_prefix)
+    app.include_router(
+        v1_router,
+        prefix=settings.api_v1_prefix,
+    )
 
     return app
 

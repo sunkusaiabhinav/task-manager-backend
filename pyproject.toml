@@ -1,61 +1,37 @@
-[tool.pytest.ini_options]
-# Test discovery
-testpaths = ["tests"]
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
+[tool.black]
+line-length = 100
+target-version = ["py312"]
 
-# Suppress deprecation warnings from third-party libs
-filterwarnings = [
-    "ignore::DeprecationWarning",
-]
+[tool.isort]
+profile = "black"
+line_length = 100
 
-# Custom markers
-markers = [
-    "slow: marks tests as slow (deselect with '-m not slow')",
-    "integration: marks integration tests",
-]
-
-# ─────────────────────────────────────────────
-[tool.coverage.run]
-source = ["app"]
-omit = [
-    "app/__init__.py",
-    "app/**/__init__.py",
-    "tests/*",
-]
-
-[tool.coverage.report]
-# Start at 70% — raise this as more tests are added
-fail_under = 70
-show_missing = true
-skip_covered = false
-
-# ─────────────────────────────────────────────
 [tool.ruff]
 target-version = "py312"
 line-length = 100
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes (unused imports, undefined names)
-    "I",   # isort (import ordering)
-    "B",   # flake8-bugbear (common bugs)
-    "UP",  # pyupgrade (modern Python syntax)
-    "N",   # pep8-naming
-    "S",   # bandit security rules
-    "C4",  # flake8-comprehensions
-    "SIM", # flake8-simplify
-]
-ignore = [
-    "S101",  # allow assert statements in tests
-    "B008",  # allow function calls in default args (FastAPI Depends pattern)
-    "S311",  # allow standard pseudo-random (not used for security here)
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "UP",
+    "N",
+    "S",
+    "C4",
+    "SIM",
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "S105", "S106"]  # allow asserts + test credentials in tests
+ignore = [
+    "S101",
+    "B008",
+    "S311",
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
 
 [tool.ruff.format]
 quote-style = "double"
