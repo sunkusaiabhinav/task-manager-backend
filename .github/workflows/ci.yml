@@ -17,34 +17,87 @@ jobs:
 
   # ── Job 1: Lint & Format ────────────────────────────────────────────────
   lint:
-    name: Lint & Format Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  name: Lint, Formatting & Static Analysis
+  runs-on: ubuntu-latest
+  timeout-minutes: 15
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
-      - name: Install ruff
-        run: pip install ruff==0.8.4
+    - name: Install project dependencies
+      run: pip install -r requirements.txt
 
-      - name: Run ruff linter
-        run: ruff check .
+    - name: Install Quality & Security Tools
+      run: |
+        pip install \
+          ruff==0.8.4 \
+          black==25.1.0 \
+          isort==6.0.1 \
+          flake8==7.1.1 \
+          mypy==1.15.0 \
+          bandit==1.8.3 \
+          pip-audit==2.9.0
 
-      - name: Run ruff formatter check
-        run: ruff format --check .
+    # -----------------------------
+    # Ruff
+    # -----------------------------
+    - name: Ruff Lint
+      run: ruff check .
+
+    - name: Ruff Format Check
+      run: ruff format --check .
+
+    # -----------------------------
+    # Black
+    # -----------------------------
+    - name: Black Format Check
+      run: black --check .
+
+    # -----------------------------
+    # isort
+    # -----------------------------
+    - name: Import Sorting Check
+      run: isort --check-only .
+
+    # -----------------------------
+    # Flake8
+    # -----------------------------
+    - name: Flake8 Lint
+      run: flake8 .
+
+    # -----------------------------
+    # MyPy
+    # -----------------------------
+    - name: MyPy Type Check
+      run: mypy app
+
+    # -----------------------------
+    # Bandit
+    # -----------------------------
+    - name: Bandit Security Scan
+      run: bandit -r app
+
+    # -----------------------------
+    # Dependency Vulnerability Scan
+    # -----------------------------
+    - name: pip-audit
+      run: pip-audit -r requirements.txt
+
+      
 
   # ── Job 2: Tests + Coverage ─────────────────────────────────────────────
   test:
